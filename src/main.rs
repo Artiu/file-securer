@@ -2,7 +2,7 @@
 
 mod images;
 
-use std::path::Path;
+use std::{path::Path, sync};
 
 use auto_launch::AutoLaunchBuilder;
 use base64::{engine::general_purpose, Engine};
@@ -82,16 +82,17 @@ fn main() {
         auto_launch.enable().unwrap();
     }
 
-    let mut watcher = notify::recommended_watcher(|res: Result<notify::Event, notify::Error>| {
-        if let Ok(event) = res {
-            handle_change_event(event.kind);
-        }
-    })
-    .unwrap();
+    let (tx, rx) = sync::mpsc::channel();
+
+    let mut watcher = notify::recommended_watcher(tx).unwrap();
 
     watcher
         .watch(Path::new(path_to_secure), notify::RecursiveMode::Recursive)
         .unwrap();
 
-    loop {}
+    for res in rx {
+        if let Ok(event) = res {
+            handle_change_event(event.kind);
+        }
+    }
 }
