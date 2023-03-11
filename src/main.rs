@@ -16,8 +16,8 @@ use windows::{
 };
 
 fn open_base64_image(name: &str, encoded_string: &str) {
-    let amogus = general_purpose::STANDARD.decode(encoded_string).unwrap();
-    let img = image::load_from_memory(&amogus).unwrap();
+    let buffer = general_purpose::STANDARD.decode(encoded_string).unwrap();
+    let img = image::load_from_memory(&buffer).unwrap();
     let path = UserDirs::new()
         .unwrap()
         .picture_dir()
